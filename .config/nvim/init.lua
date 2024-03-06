@@ -1,12 +1,21 @@
-local chad_modules = {
-   "options",
-   "mappings",
-}
+require "core"
 
-for i = 1, #chad_modules, 1 do
-   if not pcall(require, chad_modules[i]) then
-      error("Error loading " .. chad_modules[i] .. "\n")
-   end
+local custom_init_path = vim.api.nvim_get_runtime_file("lua/custom/init.lua", false)[1]
+
+if custom_init_path then
+  dofile(custom_init_path)
 end
 
-require("mappings").misc()
+require("core.utils").load_mappings()
+
+local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
+
+-- bootstrap lazy.nvim!
+if not vim.loop.fs_stat(lazypath) then
+  require("core.bootstrap").gen_chadrc_template()
+  require("core.bootstrap").lazy(lazypath)
+end
+
+dofile(vim.g.base46_cache .. "defaults")
+vim.opt.rtp:prepend(lazypath)
+require "plugins"
